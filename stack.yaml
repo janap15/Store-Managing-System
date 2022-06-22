@@ -1,0 +1,99 @@
+version: '3'
+
+services:
+  authenticationDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+    volumes:
+      - dbdata:/var/lib/mysql1
+    networks:
+      - mynet1
+  authenticationDBMigration:
+    image: authenticationdbmigration
+    environment:
+      - DATABASE_URL=authenticationDB
+    networks:
+      - mynet1
+  authentication:
+    image: authentication
+    environment:
+      - DATABASE_URL=authenticationDB
+    ports:
+      - "5000:5000"
+    networks:
+      - mynet1
+  applicationsDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+    volumes:
+      - dbdata:/var/lib/mysql2
+    networks:
+      - mynet2
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mynet2
+  applicationsDBMigration:
+    image: applicationsdbmigration
+    environment:
+      - DATABASE_URL=applicationsDB
+    networks:
+      - mynet2
+  customer:
+    image: customer
+    environment:
+      - DATABASE_URL=applicationsDB
+      - TZ=Europe/Paris
+    ports:
+      - "5001:5001"
+    networks:
+      - mynet2
+    deploy:
+      replicas: 3
+  warehouse:
+    image: warehouse
+    environment:
+      - DATABASE_URL=applicationsDB
+    ports:
+      - "5002:5002"
+    networks:
+      - mynet2
+    deploy:
+      replicas: 3
+  admin:
+    image: admin
+    environment:
+      - DATABASE_URL=applicationsDB
+      - TZ=Europe/Paris
+    ports:
+      - "5003:5003"
+    networks:
+      - mynet2
+  daemon:
+    image: daemon
+    environment:
+      - DATABASE_URL=applicationsDB
+      - TZ=Europe/Paris
+    networks:
+      - mynet2
+
+volumes:
+  dbdata:
+
+networks:
+  mynet1:
+    driver: overlay
+  mynet2:
+    driver: overlay

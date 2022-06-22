@@ -1,0 +1,104 @@
+=> dodati konfiguracije:
+
+Docker>Dockerfile konfiguracije:
+
+Name: authentication
+Dockerfile: putanja do authentication.dockerfile
+Image tag: authentication
+
+Name: authenticationDBMigration
+Dockerfile: putanja do authenticationDBMigration.dockerfile
+Image tag: authenticationdbmigration
+
+Name: admin
+Dockerfile: putanja do admin.dockerfile
+Image tag: admin
+
+Name: customer
+Dockerfile: putanja do customer.dockerfile
+Image tag: customer
+
+Name: warehouse
+Dockerfile: putanja do warehouse.dockerfile
+Image tag: warehouse
+
+Name: daemon
+Dockerfile: putanja do daemon.dockerfile
+Image tag: daemon
+
+Name: applicationsDBMigration
+Dockerfile: putanja do applicationsDBMigration.dockerfile
+Image tag: applicationsdbmigration
+
+
+Docker>Docker-compose konfiguracija (ako nece swarm):
+
+Name: deployment
+Compose files: putanja do deployment.yaml
+
+
+python konfiguracije:
+
+Name: testAll
+Script path: putanja do tests\main.py
+Parameters:
+
+--type
+all
+--authentication-address
+http://127.0.0.1:5000
+--jwt-secret
+JWT_SECRET_KEY
+--roles-field
+role
+--administrator-role
+admin
+--customer-role
+customer
+--warehouse-role
+manager
+--with-authentication
+--authentication-address
+http://127.0.0.1:5000
+--customer-address
+http://127.0.0.1:5001
+--warehouse-address
+http://127.0.0.1:5002
+--administrator-address
+http://127.0.0.1:5003
+--with-authentication
+
+========================================================================================================
+
+=> redosled pokretanja docker konfiguracija za docker images:
+
+authentication
+authenticationDBMigration
+admin
+customer
+warehouse
+daemon
+applicationsDBMigration
+
+========================================================================================================
+
+=> pokretanje preko docker swarm:
+
+=> pozicioniranje u projektu - otvoriti power shell
+docker swarm init --advertise-addr 127.0.0.1
+docker stack deploy --compose-file stack.yaml application_stack
+
+=> da li su svi servisi pokrenuti:
+docker service ls
+
+=> gasenje:
+docker swarm leave --force
+
+========================================================================================================
+
+=> u Postmanu POST zahtev ili u browseru za ciscenje baza
+http://127.0.0.1:5000/clear
+http://127.0.0.1:5002/clear
+
+
+
