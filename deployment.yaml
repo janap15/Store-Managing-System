@@ -36,9 +36,78 @@ services:
       - 5000:5000
     networks:
       - mynet1
+  applicationsDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+    volumes:
+      - dbdata:/var/lib/mysql2
+    networks:
+      - mynet2
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      - mynet2
+  applicationsDBMigration:
+    image: applicationsdbmigration
+    environment:
+      - DATABASE_URL=applicationsDB
+    depends_on:
+      applicationsDB:
+        condition: service_healthy
+    networks:
+      - mynet2
+  customer:
+    image: customer
+    environment:
+      - DATABASE_URL=applicationsDB
+      - TZ=Europe/Paris
+    depends_on:
+      - applicationsDBMigration
+    ports:
+      - 5001:5001
+    networks:
+      - mynet2
+  warehouse:
+    image: warehouse
+    environment:
+      - DATABASE_URL=applicationsDB
+    depends_on:
+      - applicationsDBMigration
+    ports:
+      - 5002:5002
+    networks:
+      - mynet2
+  admin:
+    image: admin
+    environment:
+      - DATABASE_URL=applicationsDB
+      - TZ=Europe/Paris
+    depends_on:
+      - applicationsDBMigration
+    ports:
+      - 5003:5003
+    networks:
+      - mynet2
+  daemon:
+    image: daemon
+    environment:
+      - DATABASE_URL=applicationsDB
+      - TZ=Europe/Paris
+    depends_on:
+      - applicationsDBMigration
+    networks:
+      - mynet2
 
 volumes:
   dbdata:
 
 networks:
   mynet1:
+  mynet2:

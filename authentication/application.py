@@ -93,7 +93,8 @@ def login():
     additionalClaims = {
         "forename": user.forename,
         "surname": user.surname,
-        "role": str(user.role)
+        "role": str(user.role),
+        "email": user.email
     }
 
     accessToken = create_access_token(identity=user.email, additional_claims=additionalClaims)
@@ -111,7 +112,8 @@ def refresh():
     additionalClaims = {
         "forename": refreshClaims["forename"],
         "surname": refreshClaims["surname"],
-        "role": refreshClaims["role"]
+        "role": refreshClaims["role"],
+        "email": refreshClaims["email"]
     }
 
     accessToken = create_access_token(identity=identity, additional_claims=additionalClaims)
@@ -156,6 +158,8 @@ def clear_all():
     for table in meta.sorted_tables:
         con.execute(table.delete())
     con.execute('SET FOREIGN_KEY_CHECKS = 1;')
+    con.execute('ALTER TABLE users AUTO_INCREMENT=1;')
+    con.execute('ALTER TABLE roles AUTO_INCREMENT=1;')
     trans.commit()
 
     adminRole = Role(name="admin")
