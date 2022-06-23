@@ -94,6 +94,9 @@ docker service ls
 => gasenje:
 docker swarm leave --force
 
+=> brisanje svih volumea:
+docker volume rm $(docker volume ls -q)
+
 ========================================================================================================
 
 => u Postmanu POST zahtev ili u browseru za ciscenje baza

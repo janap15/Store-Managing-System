@@ -10,7 +10,7 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata:/var/lib/mysql1
+      - dbdata1:/var/lib/mysql
     networks:
       - mynet1
   authenticationDBMigration:
@@ -36,7 +36,7 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata:/var/lib/mysql2
+      - dbdata2:/var/lib/mysql
     networks:
       - mynet2
   redis:
@@ -90,7 +90,8 @@ services:
       - mynet2
 
 volumes:
-  dbdata:
+  dbdata1:
+  dbdata2:
 
 networks:
   mynet1:

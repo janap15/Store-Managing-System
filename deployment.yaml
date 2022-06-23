@@ -14,7 +14,7 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata:/var/lib/mysql1
+      - dbdata1:/var/lib/mysql
     networks:
       - mynet1
   authenticationDBMigration:
@@ -26,6 +26,9 @@ services:
         condition: service_healthy
     networks:
       - mynet1
+    build:
+      context: .
+      dockerfile: authenticationDBMigration.dockerfile
   authentication:
     image: authentication
     environment:
@@ -36,6 +39,9 @@ services:
       - 5000:5000
     networks:
       - mynet1
+    build:
+      context: .
+      dockerfile: authentication.dockerfile
   applicationsDB:
     image: mysql
     environment:
@@ -45,7 +51,7 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata:/var/lib/mysql2
+      - dbdata2:/var/lib/mysql
     networks:
       - mynet2
   redis:
@@ -63,6 +69,9 @@ services:
         condition: service_healthy
     networks:
       - mynet2
+    build:
+      context: .
+      dockerfile: applicationsDBMigrations.dockerfile
   customer:
     image: customer
     environment:
@@ -74,6 +83,9 @@ services:
       - 5001:5001
     networks:
       - mynet2
+    build:
+      context: .
+      dockerfile: customer.dockerfile
   warehouse:
     image: warehouse
     environment:
@@ -84,6 +96,9 @@ services:
       - 5002:5002
     networks:
       - mynet2
+    build:
+      context: .
+      dockerfile: warehouse.dockerfile
   admin:
     image: admin
     environment:
@@ -95,6 +110,9 @@ services:
       - 5003:5003
     networks:
       - mynet2
+    build:
+      context: .
+      dockerfile: admin.dockerfile
   daemon:
     image: daemon
     environment:
@@ -104,9 +122,13 @@ services:
       - applicationsDBMigration
     networks:
       - mynet2
+    build:
+      context: .
+      dockerfile: daemon.dockerfile
 
 volumes:
-  dbdata:
+  dbdata1:
+  dbdata2:
 
 networks:
   mynet1:
