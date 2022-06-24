@@ -97,11 +97,14 @@ docker swarm leave --force
 => brisanje svih volumea:
 docker volume rm $(docker volume ls -q)
 
+=>brisanje sistema
+docker system prune -a
+
 ========================================================================================================
 
 => u Postmanu POST zahtev ili u browseru za ciscenje baza
 http://127.0.0.1:5000/clear
-http://127.0.0.1:5002/clear
+http://127.0.0.1:5003/clear
 
 
 

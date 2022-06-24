@@ -10,15 +10,15 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata1:/var/lib/mysql
+      - dbAuthenticationData:/var/lib/mysql
     networks:
-      - mynet1
+      - authentication
   authenticationDBMigration:
     image: authenticationdbmigration
     environment:
       - DATABASE_URL=authenticationDB
     networks:
-      - mynet1
+      - authentication
   authentication:
     image: authentication
     environment:
@@ -26,7 +26,7 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - mynet1
+      - authentication
   applicationsDB:
     image: mysql
     environment:
@@ -36,21 +36,26 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata2:/var/lib/mysql
+      - dbApplicationsData:/var/lib/mysql
     networks:
-      - mynet2
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - mynet2
+      - daemon
+      - customer
+      - admin
   applicationsDBMigration:
     image: applicationsdbmigration
     environment:
       - DATABASE_URL=applicationsDB
     networks:
-      - mynet2
+      - daemon
+      - customer
+      - admin
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - warehouse
+      - daemon
   customer:
     image: customer
     environment:
@@ -59,7 +64,7 @@ services:
     ports:
       - "5001:5001"
     networks:
-      - mynet2
+      - customer
     deploy:
       replicas: 3
   warehouse:
@@ -69,7 +74,7 @@ services:
     ports:
       - "5002:5002"
     networks:
-      - mynet2
+      - warehouse
     deploy:
       replicas: 3
   admin:
@@ -80,21 +85,27 @@ services:
     ports:
       - "5003:5003"
     networks:
-      - mynet2
+      - admin
   daemon:
     image: daemon
     environment:
       - DATABASE_URL=applicationsDB
       - TZ=Europe/Paris
     networks:
-      - mynet2
+      - daemon
 
 volumes:
-  dbdata1:
-  dbdata2:
+  dbAuthenticationData:
+  dbApplicationsData:
 
 networks:
-  mynet1:
+  authentication:
     driver: overlay
-  mynet2:
+  admin:
+    driver: overlay
+  customer:
+    driver: overlay
+  warehouse:
+    driver: overlay
+  daemon:
     driver: overlay

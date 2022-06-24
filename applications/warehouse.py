@@ -53,22 +53,6 @@ def update():
 
     return Response(status=200)
 
-@application.route("/clear", methods=["GET", "POST"])
-def clear_all():
-    meta = database.metadata
-    engine = database.engine
-    con = engine.connect()
-    trans = con.begin()
-    con.execute('SET FOREIGN_KEY_CHECKS = 0;')
-    for table in meta.sorted_tables:
-        con.execute(table.delete())
-    con.execute('SET FOREIGN_KEY_CHECKS = 1;')
-    con.execute('ALTER TABLE products AUTO_INCREMENT=1;')
-    con.execute('ALTER TABLE orders AUTO_INCREMENT=1;')
-    con.execute('ALTER TABLE categories AUTO_INCREMENT=1;')
-    trans.commit()
-
-    return str(Product.query.all())
 
 if __name__ == "__main__":
     database.init_app(application)

@@ -4,7 +4,13 @@ services:
   adminer:
     image: adminer
     ports:
-      - 8080:8080
+      - "8080:8080"
+    networks:
+      - admin
+      - authentication
+      - daemon
+      - customer
+      - warehouse
   authenticationDB:
     image: mysql
     environment:
@@ -14,9 +20,9 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata1:/var/lib/mysql
+      - dbAuthenticationData:/var/lib/mysql
     networks:
-      - mynet1
+      - authentication
   authenticationDBMigration:
     image: authenticationdbmigration
     environment:
@@ -25,7 +31,7 @@ services:
       authenticationDB:
         condition: service_healthy
     networks:
-      - mynet1
+      - authentication
     build:
       context: .
       dockerfile: authenticationDBMigration.dockerfile
@@ -36,9 +42,9 @@ services:
     depends_on:
       - authenticationDBMigration
     ports:
-      - 5000:5000
+      - "5000:5000"
     networks:
-      - mynet1
+      - authentication
     build:
       context: .
       dockerfile: authentication.dockerfile
@@ -51,15 +57,18 @@ services:
       timeout: 10s
       retries: 10
     volumes:
-      - dbdata2:/var/lib/mysql
+      - dbApplicationsData:/var/lib/mysql
     networks:
-      - mynet2
+      - customer
+      - daemon
+      - admin
   redis:
     image: redis
     ports:
-      - 6379:6379
+      - "6379:6379"
     networks:
-      - mynet2
+      - warehouse
+      - daemon
   applicationsDBMigration:
     image: applicationsdbmigration
     environment:
@@ -68,7 +77,9 @@ services:
       applicationsDB:
         condition: service_healthy
     networks:
-      - mynet2
+      - customer
+      - daemon
+      - admin
     build:
       context: .
       dockerfile: applicationsDBMigrations.dockerfile
@@ -82,7 +93,7 @@ services:
     ports:
       - 5001:5001
     networks:
-      - mynet2
+      - customer
     build:
       context: .
       dockerfile: customer.dockerfile
@@ -93,9 +104,9 @@ services:
     depends_on:
       - applicationsDBMigration
     ports:
-      - 5002:5002
+      - "5002:5002"
     networks:
-      - mynet2
+      - warehouse
     build:
       context: .
       dockerfile: warehouse.dockerfile
@@ -107,9 +118,9 @@ services:
     depends_on:
       - applicationsDBMigration
     ports:
-      - 5003:5003
+      - "5003:5003"
     networks:
-      - mynet2
+      - admin
     build:
       context: .
       dockerfile: admin.dockerfile
@@ -121,15 +132,19 @@ services:
     depends_on:
       - applicationsDBMigration
     networks:
-      - mynet2
+      - daemon
     build:
       context: .
       dockerfile: daemon.dockerfile
 
 volumes:
-  dbdata1:
-  dbdata2:
+  dbAuthenticationData:
+  dbApplicationsData:
 
 networks:
-  mynet1:
-  mynet2:
+  authentication:
+  admin:
+  customer:
+  warehouse:
+  daemon:
+
